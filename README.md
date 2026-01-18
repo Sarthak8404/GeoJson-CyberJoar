@@ -10,5 +10,5 @@ The app runs completely on the client side and is deployed as a static site.
 
 Steps to run-
 
-npm install
+npm install,
 npm run dev
