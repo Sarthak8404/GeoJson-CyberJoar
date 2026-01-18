@@ -2,7 +2,7 @@ import * as turf from "@turf/turf";
 import type { Feature, Polygon } from "geojson";
 
 /**
- * Convert Circle / Rectangle / Polygon → Polygon
+ * Normalize Circle / Rectangle / Polygon → Polygon
  */
 export function normalizeToPolygon(
   layerType: string,
@@ -24,7 +24,7 @@ export function normalizeToPolygon(
     ) as Feature<Polygon>;
   }
 
-  throw new Error("Unsupported geometry for polygon normalization");
+  throw new Error("Unsupported geometry type");
 }
 
 export function polygonIntersect(
@@ -41,7 +41,7 @@ export function isFullyContained(
   newPoly: Feature<Polygon>,
   existingPoly: Feature<Polygon>
 ) {
-  return turf.booleanContains(newPoly, existingPoly);
+  return turf.booleanWithin(existingPoly, newPoly);
 }
 
 export function trimOverlap(
@@ -51,6 +51,9 @@ export function trimOverlap(
   return turf.difference(newPoly, existingPoly);
 }
 
+/**
+ * Core polygon validation logic
+ */
 export function processNewPolygon(
   newPolygon: Feature<Polygon>,
   existingPolygons: Feature<Polygon>[]
@@ -64,11 +67,9 @@ export function processNewPolygon(
 
     if (polygonIntersect(processed, existing)) {
       const diff = trimOverlap(processed, existing);
-
       if (!diff) {
         throw new Error("Polygon overlap not allowed");
       }
-
       processed = diff as Feature<Polygon>;
     }
   }
